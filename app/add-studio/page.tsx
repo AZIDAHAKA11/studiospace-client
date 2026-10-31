@@ -23,7 +23,6 @@ export default function AddStudioPage() {
     overview: "",
   });
 
- 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/login");
@@ -36,7 +35,7 @@ export default function AddStudioPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return; 
+    if (!user) return;
 
     setIsLoading(true);
 
@@ -50,7 +49,7 @@ export default function AddStudioPage() {
 
     try {
       
-      const res = await fetch("https://studiospace-server-xyz.onrender.com/api/studios", {
+      const res = await fetch("https://studiospace-server.onrender.com/api/studios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", 
@@ -62,7 +61,7 @@ export default function AddStudioPage() {
       if (!res.ok) throw new Error(data.message || "Failed to add studio");
 
       toast.success("Studio added successfully!");
-      router.push("/my-listings"); // লিস্টিং পেজে রিডাইরেক্ট
+      router.push("/my-listings"); 
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -88,7 +87,6 @@ export default function AddStudioPage() {
 
       <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 shadow-xl dark:shadow-2xl space-y-6">
         
-        {/* Read Only User Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-100 dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-800 mb-6">
           <div>
             <label className="text-xs text-zinc-500 dark:text-zinc-400">Host Name (Read Only)</label>
@@ -101,13 +99,11 @@ export default function AddStudioPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Title */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Studio Title</label>
             <input type="text" name="title" required onChange={handleChange} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 transition-colors" placeholder="e.g., Ultimate Photo Studio" />
           </div>
 
-          {/* Category */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Category</label>
             <select name="category" onChange={handleChange} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 transition-colors">
@@ -119,7 +115,6 @@ export default function AddStudioPage() {
             </select>
           </div>
 
-          {/* Hourly Rate */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Hourly Rate ($)</label>
             <div className="relative">
@@ -128,7 +123,6 @@ export default function AddStudioPage() {
             </div>
           </div>
 
-          {/* Security Deposit */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Security Deposit ($)</label>
             <div className="relative">
@@ -137,7 +131,6 @@ export default function AddStudioPage() {
             </div>
           </div>
 
-          {/* Max Capacity */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Max Capacity</label>
             <div className="relative">
@@ -146,7 +139,6 @@ export default function AddStudioPage() {
             </div>
           </div>
 
-          {/* Location */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Location/Address</label>
             <div className="relative">
@@ -156,7 +148,6 @@ export default function AddStudioPage() {
           </div>
         </div>
 
-        {/* Image URL */}
         <div>
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Image URL</label>
           <div className="relative">
@@ -165,13 +156,11 @@ export default function AddStudioPage() {
           </div>
         </div>
 
-        {/* Amenities */}
         <div>
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Amenities (Comma separated)</label>
           <input type="text" name="amenities" onChange={handleChange} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 transition-colors" placeholder="WiFi, Lighting, AC, Green Screen" />
         </div>
 
-        {/* Detailed Overview */}
         <div>
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Detailed Overview</label>
           <textarea name="overview" required rows={4} onChange={handleChange} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 transition-colors" placeholder="Describe your studio space..."></textarea>
