@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Aperture, CalendarDays, Clock, XCircle, MapPin, X } from "lucide-react";
 import Link from "next/link";
 
 export default function MyBookingsPage() {
+  const router = useRouter();
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cancelId, setCancelId] = useState<string | null>(null);
@@ -15,10 +17,16 @@ export default function MyBookingsPage() {
     try {
       const res = await fetch("https://studiospace-server.onrender.com/api/bookings/my-bookings", {
         credentials: "include",
+        cache: "no-store"
       });
+      
       if (res.ok) {
         const data = await res.json();
         setBookings(data);
+      } else if (res.status === 401) {
+        // যদি লগইন না থাকে, তবে লগইন পেজে পাঠাবে
+        toast.error("Please login to see your bookings");
+        router.push("/login");
       }
     } catch (error) {
       console.error("Failed to fetch bookings", error);
