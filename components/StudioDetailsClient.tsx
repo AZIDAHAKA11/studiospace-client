@@ -4,21 +4,22 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Aperture, MapPin, Star, ShieldCheck, Users, CheckCircle, ArrowLeft, CalendarDays } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import BookingModal from "./BookingModal"; 
+import { useCurrentUser } from "@/components/useCurrentUser"; 
+import BookingModal from "./BookingModal";
 
 export default function StudioDetailsClient({ id }: { id: string }) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useCurrentUser(); 
   
   const [studio, setStudio] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchStudio = async () => {
       try {
-        const res = await fetch(`https://studiospace-server.onrender.com/api/studios/${id}`);
+        
+        const res = await fetch(`https://studiospace-server.onrender.com/api/studios/${id}`); 
         if (res.ok) {
           const data = await res.json();
           setStudio(data);
@@ -32,7 +33,7 @@ export default function StudioDetailsClient({ id }: { id: string }) {
     if (id) fetchStudio();
   }, [id]);
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
       <div className="flex justify-center items-center min-h-[70vh]">
         <Aperture className="w-12 h-12 text-amber-500 animate-spin" />
@@ -51,14 +52,12 @@ export default function StudioDetailsClient({ id }: { id: string }) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Back Button */}
       <button onClick={() => router.back()} className="flex items-center gap-2 text-zinc-400 hover:text-amber-500 mb-6 transition-colors">
         <ArrowLeft className="w-5 h-5" /> Back
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Side - Images & Overview */}
         <div className="lg:col-span-2 space-y-6">
           <div className="rounded-2xl overflow-hidden h-[400px] border border-zinc-800">
             <img src={studio.imageURL} alt={studio.title} className="w-full h-full object-cover" />
@@ -85,7 +84,6 @@ export default function StudioDetailsClient({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* Right Side - Booking Card */}
         <div className="lg:col-span-1">
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sticky top-24 shadow-2xl">
             <div className="flex items-end gap-1 mb-6">
@@ -126,13 +124,11 @@ export default function StudioDetailsClient({ id }: { id: string }) {
 
       </div>
 
-      {/* Booking Modal */}
       {isModalOpen && (
         <BookingModal 
           studio={studio} 
           onClose={() => setIsModalOpen(false)} 
           onSuccess={() => {
-            
             router.push('/my-bookings'); 
           }} 
         />

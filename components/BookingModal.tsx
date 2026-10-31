@@ -35,6 +35,7 @@ export default function BookingModal({ studio, onClose, onSuccess }: BookingModa
 
     setIsLoading(true);
     try {
+      // আপনার আসল Render লিংক এখানে বসানো হয়েছে
       const res = await fetch("https://studiospace-server.onrender.com/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
