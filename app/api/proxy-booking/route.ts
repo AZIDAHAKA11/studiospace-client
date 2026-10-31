@@ -1,27 +1,22 @@
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
-import { auth } from '@/lib/auth';
 
 export async function POST(req: Request) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  
-  if (!session?.user) {
-    return NextResponse.json({ message: 'Unauthorized: Google Login required' }, { status: 401 });
+  try {
+    const cookie = req.headers.get('cookie') || '';
+    const body = await req.json();
+
+    const res = await fetch('https://studiospace-server.onrender.com/api/bookings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': cookie,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch (error: any) {
+    return NextResponse.json({ message: 'Internal Server Error', error: error.message }, { status: 500 });
   }
-
-  const body = await req.json();
-  
-
-  const res = await fetch('https://studiospace-server.onrender.com/api/bookings/google-booking', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ...body,
-      userEmail: session.user.email,
-      userName: session.user.name,
-    }),
-  });
-
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
 }
