@@ -56,14 +56,24 @@ export default function AddStudioPage() {
     };
 
     try {
-      
       const res = await fetch("https://studiospace-server.onrender.com/api/studios/google-add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(studioData),
       });
 
-      const data = await res.json();
+   
+      const text = await res.text();
+      let data;
+      
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+      
+        console.error("Render Server Response:", text);
+        throw new Error("Render সার্ভার হয়তো ঘুমিয়ে আছে বা রুটটি খুঁজে পাচ্ছে না। ৩০ সেকেন্ড অপেক্ষা করে আবার চেষ্টা করুন।");
+      }
+
       if (!res.ok) throw new Error(data.message || "Failed to add studio");
 
       toast.success("Studio added successfully!");
