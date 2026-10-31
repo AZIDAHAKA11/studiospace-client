@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
- 
+   
     const session = await auth.api.getSession({ headers: await headers() });
     
     if (!session?.user) {
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     
-    // Render-এ পাঠানো হচ্ছে
+    
     const res = await fetch('https://studiospace-server.onrender.com/api/studios/google-add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -24,7 +24,18 @@ export async function POST(req: Request) {
       }),
     });
 
-    const data = await res.json();
+   
+    const text = await res.text();
+    let data;
+    
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      return NextResponse.json({ 
+        message: 'Render সার্ভার হয়তো ঘুমিয়ে আছে। ৫০ সেকেন্ড অপেক্ষা করে আবার চেষ্টা করুন।' 
+      }, { status: 500 });
+    }
+
     return NextResponse.json(data, { status: res.status });
   } catch (error: any) {
     return NextResponse.json({ message: 'Internal Server Error', error: error.message }, { status: 500 });
