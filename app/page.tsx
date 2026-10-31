@@ -12,10 +12,11 @@ import StudioCard from "@/components/StudioCard";
 export default function Home() {
   const [featuredStudios, setFeaturedStudios] = useState([]);
 
-  useEffect(() => {
+    useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const res = await fetch("https://studiospace-server.onrender.com/api/studios?limit=6");
+        
+        const res = await fetch("https://studiospace-server.onrender.com/api/studios?limit=6", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           setFeaturedStudios(data);

@@ -20,7 +20,9 @@ function StudiosContent() {
         if (categoryParam) {
           url += `?category=${encodeURIComponent(categoryParam)}`;
         }
-        const res = await fetch(url);
+        
+        
+        const res = await fetch(url, { cache: "no-store" });
         const data = await res.json();
         setStudios(data);
       } catch (error) {
@@ -43,7 +45,7 @@ function StudiosContent() {
           Find the perfect studio for your next project. From photo studios to film stages, we have it all.
         </p>
         {categoryParam && (
-          <Link href="/studios" className="inline-block mt-4 text-amber-600 dark:text-amber-500 hover:underline font-medium">
+          <Link href="/studios" className="inline-block mt-4 text-amber-500 hover:underline font-medium">
             Clear Filter
           </Link>
         )}
