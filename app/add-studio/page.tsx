@@ -12,8 +12,8 @@ export default function AddStudioPage() {
   const { user: expressUser, isLoading: expressLoading } = useAuth();
   const { data: baSession, isPending: baPending } = useSession();
   
- 
-  const user = expressUser || (baSession?.user ? { name: baSession.user.name, email: baSession.user.email } : null);
+  const currentUserEmail = expressUser?.email || baSession?.user?.email;
+  const currentUserName = expressUser?.name || baSession?.user?.name || "Host";
   const isAuthLoading = expressLoading || baPending;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,10 +30,10 @@ export default function AddStudioPage() {
   });
 
   useEffect(() => {
-    if (!isAuthLoading && !user) {
+    if (!isAuthLoading && !currentUserEmail) {
       router.push("/login");
     }
-  }, [user, isAuthLoading, router]);
+  }, [currentUserEmail, isAuthLoading, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -41,7 +41,7 @@ export default function AddStudioPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!currentUserEmail) return;
 
     setIsSubmitting(true);
 
@@ -51,20 +51,15 @@ export default function AddStudioPage() {
       securityDeposit: Number(formData.securityDeposit),
       maxCapacity: Number(formData.maxCapacity),
       amenities: formData.amenities.split(",").map(item => item.trim()).filter(item => item !== ""),
+      ownerEmail: currentUserEmail, 
+      ownerName: currentUserName,    
     };
 
     try {
-    
-      const isGoogleUser = !!baSession?.user;
       
-      const url = isGoogleUser 
-        ? "/api/proxy-add-studio" 
-        : "https://studiospace-server.onrender.com/api/studios";
-
-      const res = await fetch(url, {
+      const res = await fetch("https://studiospace-server.onrender.com/api/studios/google-add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", 
         body: JSON.stringify(studioData),
       });
 
@@ -101,11 +96,11 @@ export default function AddStudioPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-100 dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-800 mb-6">
           <div>
             <label className="text-xs text-zinc-500 dark:text-zinc-400">Host Name (Read Only)</label>
-            <input type="text" value={user?.name || ""} readOnly className="w-full bg-transparent text-zinc-900 dark:text-zinc-300 font-medium focus:outline-none mt-1" />
+            <input type="text" value={currentUserName} readOnly className="w-full bg-transparent text-zinc-900 dark:text-zinc-300 font-medium focus:outline-none mt-1" />
           </div>
           <div>
             <label className="text-xs text-zinc-500 dark:text-zinc-400">Host Email (Read Only)</label>
-            <input type="text" value={user?.email || ""} readOnly className="w-full bg-transparent text-zinc-900 dark:text-zinc-300 font-medium focus:outline-none mt-1" />
+            <input type="text" value={currentUserEmail || ""} readOnly className="w-full bg-transparent text-zinc-900 dark:text-zinc-300 font-medium focus:outline-none mt-1" />
           </div>
         </div>
 
