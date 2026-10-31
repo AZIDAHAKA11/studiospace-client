@@ -24,10 +24,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = async () => {
     try {
-      // আপনার আসল Render লিংক এখানে বসানো হয়েছে
+      // ক্যাশ বন্ধ করা হলো, যাতে লগইন করার পর সাথে সাথে নেভবার আপডেট হয়
       const res = await fetch("https://studiospace-server.onrender.com/api/auth/me", {
         credentials: "include", 
+        cache: "no-store" 
       });
+      
       if (res.ok) {
         const data = await res.json();
         setUser(data);
