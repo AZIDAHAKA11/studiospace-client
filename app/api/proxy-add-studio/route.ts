@@ -1,19 +1,27 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
+ 
+    const session = await auth.api.getSession({ headers: await headers() });
     
-    const cookie = req.headers.get('cookie') || '';
-    const body = await req.json();
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Unauthorized: Please login again' }, { status: 401 });
+    }
 
+    const body = await req.json();
     
-    const res = await fetch('https://studiospace-server.onrender.com/api/studios', {
+    // Render-এ পাঠানো হচ্ছে
+    const res = await fetch('https://studiospace-server.onrender.com/api/studios/google-add', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': cookie, 
-      },
-      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...body,
+        ownerEmail: session.user.email,
+        ownerName: session.user.name,
+      }),
     });
 
     const data = await res.json();

@@ -3,14 +3,20 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { useCurrentUser } from "@/components/useCurrentUser";
+import { useAuth } from "@/context/AuthContext";
+import { useSession } from "@/lib/auth-client";
 import { Aperture, Image as ImageIcon, DollarSign, MapPin, Users, ShieldCheck, Loader2 } from "lucide-react";
 
 export default function AddStudioPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useCurrentUser();
-  const [isLoading, setIsLoading] = useState(false);
+  const { user: expressUser, isLoading: expressLoading } = useAuth();
+  const { data: baSession, isPending: baPending } = useSession();
+  
+ 
+  const user = expressUser || (baSession?.user ? { name: baSession.user.name, email: baSession.user.email } : null);
+  const isAuthLoading = expressLoading || baPending;
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     category: "Photo Studio",
@@ -24,10 +30,10 @@ export default function AddStudioPage() {
   });
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!isAuthLoading && !user) {
       router.push("/login");
     }
-  }, [user, authLoading, router]);
+  }, [user, isAuthLoading, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,7 +43,7 @@ export default function AddStudioPage() {
     e.preventDefault();
     if (!user) return;
 
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     const studioData = {
       ...formData,
@@ -48,8 +54,14 @@ export default function AddStudioPage() {
     };
 
     try {
+    
+      const isGoogleUser = !!baSession?.user;
       
-      const res = await fetch("https://studiospace-server.onrender.com/api/studios", {
+      const url = isGoogleUser 
+        ? "/api/proxy-add-studio" 
+        : "https://studiospace-server.onrender.com/api/studios";
+
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", 
@@ -57,7 +69,6 @@ export default function AddStudioPage() {
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message || "Failed to add studio");
 
       toast.success("Studio added successfully!");
@@ -65,11 +76,11 @@ export default function AddStudioPage() {
     } catch (error: any) {
       toast.error(error.message);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  if (authLoading) {
+  if (isAuthLoading) {
     return (
       <div className="flex justify-center items-center min-h-[80vh] bg-zinc-50 dark:bg-zinc-950">
         <Loader2 className="w-12 h-12 text-amber-500 animate-spin" />
@@ -166,8 +177,8 @@ export default function AddStudioPage() {
           <textarea name="overview" required rows={4} onChange={handleChange} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 transition-colors" placeholder="Describe your studio space..."></textarea>
         </div>
 
-        <button type="submit" disabled={isLoading} className="w-full bg-amber-500 text-black font-bold py-3 rounded-lg hover:bg-amber-400 transition-colors disabled:opacity-50 flex justify-center items-center gap-2">
-          {isLoading ? <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</> : "Add Studio Listing"}
+        <button type="submit" disabled={isSubmitting} className="w-full bg-amber-500 text-black font-bold py-3 rounded-lg hover:bg-amber-400 transition-colors disabled:opacity-50 flex justify-center items-center gap-2">
+          {isSubmitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</> : "Add Studio Listing"}
         </button>
       </form>
     </div>
