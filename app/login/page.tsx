@@ -6,7 +6,7 @@ import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { Aperture, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { authClient } from "@/lib/auth-client"; // BetterAuth Client
+import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,12 +18,12 @@ export default function LoginPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ১. Email/Password লগইন (Express Backend)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
+      
       const res = await fetch("https://studiospace-server.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,7 +48,6 @@ export default function LoginPage() {
     }
   };
 
-  // ২. Google Login (BetterAuth)
   const handleGoogleLogin = async () => {
     try {
       await authClient.signIn.social({
@@ -61,17 +60,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md bg-zinc-900 p-8 rounded-2xl border border-zinc-800 shadow-2xl">
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12 bg-zinc-50 dark:bg-zinc-950 transition-colors">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl">
         <div className="text-center mb-8">
           <Aperture className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
-          <p className="text-zinc-400 mt-2">Login to manage your bookings and studios.</p>
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">Welcome Back</h1>
+          <p className="text-zinc-600 dark:text-zinc-400 mt-2">Login to manage your bookings and studios.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1">Email Address</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Email Address</label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 w-5 h-5 text-zinc-500" />
               <input 
@@ -79,14 +78,14 @@ export default function LoginPage() {
                 name="email" 
                 required 
                 onChange={handleChange} 
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-amber-500 transition-colors" 
+                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg pl-10 pr-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 transition-colors" 
                 placeholder="john@example.com" 
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1">Password</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-400 mb-1">Password</label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 w-5 h-5 text-zinc-500" />
               <input 
@@ -94,7 +93,7 @@ export default function LoginPage() {
                 name="password" 
                 required 
                 onChange={handleChange} 
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-amber-500 transition-colors" 
+                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg pl-10 pr-4 py-2.5 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 transition-colors" 
                 placeholder="••••••••" 
               />
             </div>
@@ -109,21 +108,19 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-zinc-800"></div>
+            <div className="w-full border-t border-zinc-200 dark:border-zinc-800"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-zinc-900 text-zinc-500">Or continue with</span>
+            <span className="px-2 bg-white dark:bg-zinc-900 text-zinc-500">Or continue with</span>
           </div>
         </div>
 
-        {/* Google Button */}
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-3 bg-white text-black font-bold py-3 rounded-lg hover:bg-zinc-200 transition-colors"
+          className="w-full flex items-center justify-center gap-3 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-300 dark:border-zinc-700 font-bold py-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -134,7 +131,7 @@ export default function LoginPage() {
           Continue with Google
         </button>
 
-        <p className="text-center text-zinc-400 mt-6">
+        <p className="text-center text-zinc-600 dark:text-zinc-400 mt-6">
           Don't have an account? <Link href="/register" className="text-amber-500 hover:underline">Register here</Link>
         </p>
       </div>

@@ -24,8 +24,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = async () => {
     try {
+      // আপনার আসল Render লিংক এখানে বসানো হয়েছে
       const res = await fetch("https://studiospace-server.onrender.com/api/auth/me", {
-        credentials: "include", // কুকি পাঠানোর জন্য
+        credentials: "include", 
       });
       if (res.ok) {
         const data = await res.json();

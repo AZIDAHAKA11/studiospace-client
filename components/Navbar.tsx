@@ -1,35 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { Aperture, Menu, X, LogOut, LayoutDashboard, PlusSquare, List, CalendarDays } from "lucide-react";
+import { Aperture, Menu, X, LogOut, LayoutDashboard, PlusSquare, List, CalendarDays, User as UserIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import ThemeToggle from "./ThemeToggle";
-import { useSession, signOut as betterAuthSignOut } from "@/lib/auth-client"; // BetterAuth হুক
+import { useCurrentUser } from "@/components/useCurrentUser"; 
+import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
-  // ১. Express Auth Context (Email/Password)
-  const { user: expressUser, isLoading: expressLoading, logout: expressLogout } = useAuth();
-  
-  // ২. BetterAuth Session (Google Login)
-  const { data: baSession, isPending: baLoading } = useSession();
-  
   const router = useRouter();
-
-  // ৩. দুই জায়গা থেকে ইউজার ডাটা একসাথে করা
-  const user = expressUser || (baSession?.user ? {
-    name: baSession.user.name || "User",
-    email: baSession.user.email,
-    photoURL: baSession.user.image || undefined
-  } : null);
-
-  const isLoading = expressLoading || baLoading;
+  
+  
+  const { user, isLoading } = useCurrentUser();
+  const { logout: expressLogout } = useAuth();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -41,11 +30,10 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ৪. লগআউট ফাংশন (দুই সিস্টেমের জন্যই)
   const handleLogout = async () => {
     try {
-      if (expressUser) await expressLogout(); // Express লগআউট
-      if (baSession) await betterAuthSignOut(); // BetterAuth লগআউট
+      await expressLogout(); 
+      await authClient.signOut(); 
       
       toast.success("Logged out successfully");
       router.push("/login");
