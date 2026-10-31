@@ -17,16 +17,13 @@ export default function MyListingsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const currentUserEmail = expressUser?.email || baSession?.user?.email;
-  const isGoogleUser = !!baSession?.user;
 
   const fetchMyStudios = async () => {
     if (!currentUserEmail) return;
 
     try {
-      let url = "https://studiospace-server.onrender.com/api/studios/my-listings";
-      if (isGoogleUser) {
-        url = "/api/proxy-my-listings";
-      }
+      
+      const url = `https://studiospace-server.onrender.com/api/studios/my-listings?email=${currentUserEmail}`;
 
       const res = await fetch(url, {
         credentials: "include",
@@ -51,22 +48,18 @@ export default function MyListingsPage() {
         fetchMyStudios();
       }
     }
-  }, [expressLoading, baLoading, currentUserEmail, isGoogleUser]);
+  }, [expressLoading, baLoading, currentUserEmail]);
 
   const confirmDelete = async () => {
-    if (!deleteId) return;
+    if (!deleteId || !currentUserEmail) return;
     setIsDeleting(true);
 
     try {
-      let url = `https://studiospace-server.onrender.com/api/studios/${deleteId}`;
-      let method = "DELETE";
-
-      if (isGoogleUser) {
-        url = `/api/proxy-delete-studio?id=${deleteId}`;
-      }
+      
+      const url = `https://studiospace-server.onrender.com/api/studios/${deleteId}?email=${currentUserEmail}`;
 
       const res = await fetch(url, {
-        method,
+        method: "DELETE",
         credentials: "include",
       });
       
