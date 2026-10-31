@@ -5,26 +5,42 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Aperture, CalendarDays, Clock, XCircle, MapPin, X } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { useSession } from "@/lib/auth-client";
 
 export default function MyBookingsPage() {
   const router = useRouter();
+  const { user: expressUser, isLoading: expressLoading } = useAuth();
+  const { data: baSession, isPending: baLoading } = useSession();
+  
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
 
+  const currentUserEmail = expressUser?.email || baSession?.user?.email;
+  const isGoogleUser = !!baSession?.user;
+
   const fetchBookings = async () => {
+    if (!currentUserEmail) return;
+
     try {
-      const res = await fetch("https://studiospace-server.onrender.com/api/bookings/my-bookings", {
+      let url = "https://studiospace-server.onrender.com/api/bookings/my-bookings";
+      
+     
+      if (isGoogleUser) {
+        url = "/api/proxy-my-bookings";
+      }
+
+      const res = await fetch(url, { 
         credentials: "include",
-        cache: "no-store"
+        cache: "no-store" 
       });
       
       if (res.ok) {
         const data = await res.json();
         setBookings(data);
       } else if (res.status === 401) {
-        // যদি লগইন না থাকে, তবে লগইন পেজে পাঠাবে
         toast.error("Please login to see your bookings");
         router.push("/login");
       }
@@ -36,17 +52,37 @@ export default function MyBookingsPage() {
   };
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    if (!expressLoading && !baLoading) {
+      if (!currentUserEmail) {
+        router.push("/login");
+      } else {
+        fetchBookings();
+      }
+    }
+  }, [expressLoading, baLoading, currentUserEmail, isGoogleUser]);
 
   const confirmCancel = async () => {
     if (!cancelId) return;
     setIsCancelling(true);
 
     try {
-      const res = await fetch(`https://studiospace-server.onrender.com/api/bookings/${cancelId}/cancel`, {
-        method: "PATCH",
+      let url = `https://studiospace-server.onrender.com/api/bookings/${cancelId}/cancel`;
+      let method = "PATCH";
+      let body = null;
+      let headers = {};
+
+      
+      if (isGoogleUser) {
+        url = "/api/proxy-cancel-booking";
+        body = JSON.stringify({ bookingId: cancelId });
+        headers = { "Content-Type": "application/json" };
+      }
+
+      const res = await fetch(url, {
+        method,
         credentials: "include",
+        headers,
+        body
       });
       
       const data = await res.json();
@@ -71,7 +107,7 @@ export default function MyBookingsPage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || expressLoading || baLoading) {
     return (
       <div className="flex justify-center items-center min-h-[70vh] bg-zinc-50 dark:bg-zinc-950">
         <Aperture className="w-12 h-12 text-amber-500 animate-spin" />
